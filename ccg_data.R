@@ -155,23 +155,81 @@ ccg_map = function(ccg_data){
   return(ccg_map)
 }
 
-colour_map = function(ccg_map, attribute){
+make_popup_messages = function(ccg_map){
   ccg_map$AGI = round(ccg_map$AGI)
-  popup_message = paste0("<b>Name: </b>",ccg_map$CCG16NM,"<br>",
+  popup_messages = paste0("<b>Name: </b>",ccg_map$CCG16NM,"<br>",
                          "<b>IMD: </b>",round(ccg_map$IMD,3),"<br>",
                          "<b>Population: </b>",round(ccg_map$total_pop),"<br>",
                          "<b>Standardised Rate: </b>", round(ccg_map$mean),"<br>",
                          "<b>AGI: </b>",round(ccg_map$AGI),
                          " (95% CI: ",round(ccg_map$AGI_LCI)," to ",round(ccg_map$AGI_UCI),")<br>",
                          "<b>RGI: </b>",round(ccg_map$RGI,2))
+  return(data_frame(CCG16CDH=ccg_map$CCG16CDH,message=popup_messages))  
+}
+
+colour_map = function(ccg_map){
+  ccg_map$AGI = round(ccg_map$AGI)
+  popup_message = make_popup_messages(ccg_map)$message
   
-  ccg_pal = colorBin("Blues", ccg_map$AGI, 5, pretty = FALSE)#colorQuantile("Blues", ccg_map$AGI, n=5)
+  agi_pal = colorBin("Blues", ccg_map$AGI, 5, pretty = FALSE)
+  rgi_pal = colorBin("Reds", ccg_map$RGI, 5, pretty = FALSE)
+  imd_pal = colorQuantile("Greens", ccg_map$IMD, n=5)
+  pop_pal = colorBin("Oranges", ccg_map$total_pop, 5, pretty = FALSE)
+  rate_pal = colorBin("Purples", ccg_map$mean, 5, pretty = FALSE)
   
   leaflet(ccg_map) %>% 
     addProviderTiles("Stamen.TonerLite", options = providerTileOptions(noWrap = TRUE)) %>%
-    addPolygons(stroke = TRUE, smoothFactor = 1, fillOpacity = 0.7, weight = 1, 
-    popup = popup_message, fillColor = ccg_pal(ccg_map$AGI), color="black") %>%
-    addLegend("topleft", pal = ccg_pal, values = ccg_map$AGI, title = "AGI", opacity = 0.7)
+    addPolygons(stroke = TRUE, 
+                smoothFactor = 1, 
+                fillOpacity = 0.7, 
+                weight = 1, 
+                popup = popup_message, 
+                fillColor = agi_pal(ccg_map$AGI), 
+                color="black",
+                layerId=ccg_map$CCG16CDH,
+                group="AGI") %>%
+    # addLegend("topleft", 
+    #           pal = agi_pal, 
+    #           values = ccg_map$AGI, 
+    #           title = "AGI", 
+    #           opacity = 0.7) %>%
+    addPolygons(stroke = TRUE, 
+                smoothFactor = 1, 
+                fillOpacity = 0.7, 
+                weight = 1, 
+                popup = popup_message, 
+                fillColor = rgi_pal(ccg_map$RGI), 
+                color="black",
+                group="RGI") %>%
+    addPolygons(stroke = TRUE, 
+                smoothFactor = 1, 
+                fillOpacity = 0.7, 
+                weight = 1, 
+                popup = popup_message, 
+                fillColor = imd_pal(ccg_map$IMD), 
+                color="black",
+                group="IMD") %>%
+    addPolygons(stroke = TRUE, 
+                smoothFactor = 1, 
+                fillOpacity = 0.7, 
+                weight = 1, 
+                popup = popup_message, 
+                fillColor = pop_pal(ccg_map$total_pop), 
+                color="black",
+                group="Population") %>%
+    addPolygons(stroke = TRUE, 
+                smoothFactor = 1, 
+                fillOpacity = 0.7, 
+                weight = 1, 
+                popup = popup_message, 
+                fillColor = rate_pal(ccg_map$mean), 
+                color="black",
+                group="Standardised Rate") %>%
+    addLayersControl(
+      baseGroups=c("AGI", "RGI", "IMD", "Population", "Standardised Rate"),
+      position = "bottomleft",
+      options = layersControlOptions(collapsed = FALSE)
+    )
 }
 
 all_ccg_table = function(ccg_data){
@@ -199,5 +257,6 @@ ccg_mappings = load_ccg_mappings()
 national_sii = coef(lm(age_stdrate~imdscaled, data=lsoa_data, weights=population))
 ccg_data = calculate_ccg_data(lsoa_data, ccg_mappings)
 
-map = ccg_map(ccg_data)
-choropleth_map = colour_map(map,"AGI")
+ccg_map = ccg_map(ccg_data)
+popup_messages = make_popup_messages(ccg_map)
+choropleth_map = colour_map(ccg_map)

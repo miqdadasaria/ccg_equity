@@ -35,12 +35,27 @@ shinyServer(function(input, output) {
 	  print(choropleth_map)
 	})
 	
+	# observeEvent(input$ccg_map_shape_mouseout$id, {
+	#  leafletProxy("ccg_map") %>% clearPopups()
+	# })
+	# 
+	# observeEvent(input$ccg_map_shape_mouseover$id, {
+	#   pointId = input$ccg_map_shape_mouseover$id
+	#   message = popup_messages %>% filter(CCG16CDH==pointId) %>% select(message) %>% as.character()
+	#   leafletProxy("ccg_map") %>% addPopups(lat = input$ccg_map_bounds$north, lng = input$ccg_map_bounds$west, message)
+	# })
+	
+	# observeEvent(input$ccg_map_shape_click$id, {
+	#   input$ccg_code = input$ccg_map_shape_click$id
+	# })
+	
 	output$ccg = renderText({
 	  if(is.null(input$ccg_map_shape_mouseover)){
 	    highlight_ccg = ""
 	  }else{
-	    highlight_ccg = names(input$ccg_map_shape_mouseover)
-	   }
+	    highlight_ccg = input$ccg_map_shape_mouseover[["id"]]
+	    #highlight_ccg = ""
+	  }
 	  
 	  print(highlight_ccg)
 	})
