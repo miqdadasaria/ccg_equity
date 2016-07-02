@@ -9,22 +9,39 @@ source("ccg_data.R")
 
 # Define server logic required to plot various variables against mpg
 shinyServer(function(input, output) {
-	
+  
+  selected_ccg = reactiveValues(name="Vale of York")
+  
+  output$ccg_list = renderUI({
+    ccgs = ccg_data %>% select(CCG16NM) %>% arrange(CCG16NM)
+    default_ccg = ifelse(is.null(selected_ccg$name),"Vale of York",selected_ccg$name)
+    selectInput(inputId="ccg_name", 
+                label="Select CCG to show details:", 
+                choices=as.list(t(ccgs$CCG16NM)), 
+                selected=default_ccg)
+  })
+  
+  observe({
+    selected_ccg$name = input$ccg_name
+  })
+
   output$title = renderText({
-    title = ccg_data %>% filter(CCG16CDH==input$ccg_code) %>% select(CCG16NM)
-    print(title[[1]])
+    print(selected_ccg$name)
   })
   
   output$scatter_plot = renderPlot({
-    print(scatter_plot(lsoa_data, ccg_data, input$ccg_code, national_sii, input$trim))
+    ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
+    print(scatter_plot(lsoa_data, ccg_data, ccg_code, national_sii, input$trim))
   })
   
   output$caterpillar_plot = renderPlot({
-    print(caterpillar_plot(ccg_data, input$ccg_code, national_sii))
+    ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
+    print(caterpillar_plot(ccg_data, ccg_code, national_sii))
   })
 			
 	output$similar_agi_data = renderDataTable({
-	  print(similar_ccg_table(ccg_data, ccg_mappings, input$ccg_code))
+	  ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
+	  print(similar_ccg_table(ccg_data, ccg_mappings, ccg_code))
 	})
 	
 	output$ccg_agi_data = renderDataTable({
@@ -35,29 +52,22 @@ shinyServer(function(input, output) {
 	  print(choropleth_map)
 	})
 	
-	# observeEvent(input$ccg_map_shape_mouseout$id, {
-	#  leafletProxy("ccg_map") %>% clearPopups()
-	# })
-	# 
-	# observeEvent(input$ccg_map_shape_mouseover$id, {
-	#   pointId = input$ccg_map_shape_mouseover$id
-	#   message = popup_messages %>% filter(CCG16CDH==pointId) %>% select(message) %>% as.character()
-	#   leafletProxy("ccg_map") %>% addPopups(lat = input$ccg_map_bounds$north, lng = input$ccg_map_bounds$west, message)
-	# })
-	
-	# observeEvent(input$ccg_map_shape_click$id, {
-	#   input$ccg_code = input$ccg_map_shape_click$id
-	# })
-	
+	observeEvent(input$ccg_map_shape_click$id, {
+	  selected_ccg$name = input$ccg_map_shape_click$id
+	})
+
 	output$ccg = renderText({
-	  if(is.null(input$ccg_map_shape_mouseover)){
-	    highlight_ccg = ""
-	  }else{
-	    highlight_ccg = input$ccg_map_shape_mouseover[["id"]]
-	    #highlight_ccg = ""
-	  }
-	  
+	  highlight_ccg = ""
+	    if(length(input$ccg_map_shape_mouseover$id)>0){
+	      highlight_ccg = paste0("Click to see details for NHS ",input$ccg_map_shape_mouseover[["id"]]," CCG")
+	    }
 	  print(highlight_ccg)
 	})
+
+	# observeEvent(input$ccg_map_shape_mouseover$id, {
+	#   pointId = input$ccg_map_shape_mouseover$id
+	#   message = popup_messages %>% filter(CCG16NM==pointId) %>% select(message) %>% as.character()
+	#   leafletProxy("ccg_map") %>% addPopups(lat = input$ccg_map_shape_mouseover$lat, lng = input$ccg_map_shape_mouseover$lng, message, layerId="popups_layer")
+	# })
 	
 })

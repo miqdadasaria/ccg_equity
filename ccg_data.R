@@ -164,7 +164,7 @@ make_popup_messages = function(ccg_map){
                          "<b>AGI: </b>",round(ccg_map$AGI),
                          " (95% CI: ",round(ccg_map$AGI_LCI)," to ",round(ccg_map$AGI_UCI),")<br>",
                          "<b>RGI: </b>",round(ccg_map$RGI,2))
-  return(data_frame(CCG16CDH=ccg_map$CCG16CDH,message=popup_messages))  
+  return(data_frame(CCG16NM=ccg_map$CCG16NM,message=popup_messages))  
 }
 
 colour_map = function(ccg_map){
@@ -186,7 +186,7 @@ colour_map = function(ccg_map){
                 popup = popup_message, 
                 fillColor = agi_pal(ccg_map$AGI), 
                 color="black",
-                layerId=ccg_map$CCG16CDH,
+                layerId=ccg_map$CCG16NM,
                 group="AGI") %>%
     # addLegend("topleft", 
     #           pal = agi_pal, 
