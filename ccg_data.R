@@ -177,7 +177,7 @@ colour_map = function(ccg_map){
   pop_pal = colorBin("Oranges", ccg_map$total_pop, 5, pretty = FALSE)
   rate_pal = colorBin("Purples", ccg_map$mean, 5, pretty = FALSE)
   
-  leaflet(ccg_map) %>% 
+  choropleth_map = leaflet(ccg_map) %>% 
     addProviderTiles("Stamen.TonerLite", options = providerTileOptions(noWrap = TRUE)) %>%
     addPolygons(stroke = TRUE, 
                 smoothFactor = 1, 
@@ -230,6 +230,7 @@ colour_map = function(ccg_map){
       position = "bottomleft",
       options = layersControlOptions(collapsed = FALSE)
     )
+  return(choropleth_map)
 }
 
 all_ccg_table = function(ccg_data){
