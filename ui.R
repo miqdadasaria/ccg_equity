@@ -23,7 +23,7 @@ shinyUI(pageWithSidebar(
 	    
 			uiOutput("ccg_list"),
 	  
-	    selectInput("trim", "Trim outliers on scatter plots:",
+	    selectInput("trim", "Trim outliers beyond 95% CI of mean on scatter plots:",
 	            list("True" = "TRUE",
 	                 "False" = "FALSE"), selected="TRUE")
 	),
@@ -31,7 +31,7 @@ shinyUI(pageWithSidebar(
 	mainPanel(
 	      h3(textOutput("title")),
 	      textOutput("ccg"),
-	      tabsetPanel(
+	      tabsetPanel(id="tabset",
 	        tabPanel("Map", leafletOutput("ccg_map")),
 	        tabPanel("Scatter", plotOutput("scatter_plot")),
 				  tabPanel("Caterpillar", plotOutput("caterpillar_plot")),

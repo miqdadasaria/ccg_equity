@@ -56,18 +56,21 @@ shinyServer(function(input, output) {
 	  selected_ccg$name = input$ccg_map_shape_click$id
 	})
 
-	output$ccg = renderText({
-	  highlight_ccg = ""
-	    if(length(input$ccg_map_shape_mouseover$id)>0){
-	      highlight_ccg = paste0("Click to see details for NHS ",input$ccg_map_shape_mouseover[["id"]]," CCG")
-	    }
-	  print(highlight_ccg)
+	observeEvent(input$ccg_map_shape_mouseout$id, {
+	  highlight_ccg = "Click on the map or select from the list to view another CCG"
+	  output$ccg = renderText({ print(highlight_ccg) })
 	})
-
-	# observeEvent(input$ccg_map_shape_mouseover$id, {
-	#   pointId = input$ccg_map_shape_mouseover$id
-	#   message = popup_messages %>% filter(CCG16NM==pointId) %>% select(message) %>% as.character()
-	#   leafletProxy("ccg_map") %>% addPopups(lat = input$ccg_map_shape_mouseover$lat, lng = input$ccg_map_shape_mouseover$lng, message, layerId="popups_layer")
+	
+	observeEvent(input$ccg_map_shape_mouseover$id, {
+	  highlight_ccg = ""
+  	if(length(input$ccg_map_shape_mouseover$id)>0){
+  	  highlight_ccg = paste0("Click to see details for NHS ",input$ccg_map_shape_mouseover[["id"]]," CCG")
+  	}
+	  output$ccg = renderText({ print(highlight_ccg) })
+	})
+	
+	# observeEvent(input$tabset, {
+	#   leafletProxy("ccg_map", deferUntilFlush = FALSE) %>% clearPopups()
 	# })
 	
 })

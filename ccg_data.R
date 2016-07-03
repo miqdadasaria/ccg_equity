@@ -5,6 +5,7 @@
 ###############################################################################
 
 library(rgdal)
+library(rgeos)
 library(leaflet)
 library(dplyr)
 library(ggplot2)
@@ -13,7 +14,6 @@ library(htmltools)
 
 load_lsoa_data = function(){
   lsoa_data = read.csv("data/ccg_lsoa_data.csv", stringsAsFactors=FALSE)
-  lsoa_data$rate = as.double(gsub(",","",lsoa_data$rate))
   lsoa_data$age_stdrate = as.double(gsub(",","",lsoa_data$age_stdrate))
   lsoa_data = lsoa_data %>% select(CCG16CDH=CCG,population,admissions,expectedadmissions,imdscaled,age_stdrate)
   return(lsoa_data)
@@ -124,8 +124,8 @@ scatter_plot = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
   
   if(trim){
     scatter_data = subset(scatter_data,
-                          (age_stdrate<(mean(age_stdrate)+qnorm((1+0.90)/2)*sd(age_stdrate))
-                                        & age_stdrate>(mean(age_stdrate)-qnorm((1+0.90)/2)*sd(age_stdrate))))   
+                          (age_stdrate<(mean(age_stdrate)+qnorm((1+0.95)/2)*sd(age_stdrate))
+                                        & age_stdrate>(mean(age_stdrate)-qnorm((1+0.95)/2)*sd(age_stdrate))))   
   }
   
   scatter = ggplot() +
@@ -151,7 +151,6 @@ ccg_map = function(ccg_data){
   ccg_map = readOGR("data/ccg_map_2016.geojson", "OGRGeoJSON", verbose=FALSE, stringsAsFactors=FALSE)
   ccg_map@data$CCG16NM = trimws(gsub("CCG|NHS","",ccg_map@data$CCG16NM))
   ccg_map@data = left_join(ccg_map@data,ccg_data,by=c("CCG16CD","CCG16NM"))
-  
   return(ccg_map)
 }
 
