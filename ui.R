@@ -35,6 +35,7 @@ shinyUI(pageWithSidebar(
 	        tabPanel("Map", leafletOutput("ccg_map")),
 	        tabPanel("Scatter", plotOutput("scatter_plot")),
 				  tabPanel("Caterpillar", plotOutput("caterpillar_plot")),
+				  tabPanel("Caterpillar Similar CCGs", plotOutput("similar_caterpillar_plot")),
 				  tabPanel("Similar CCGs", dataTableOutput("similar_agi_data")),
 				  tabPanel("All CCGs", dataTableOutput("ccg_agi_data"))
 				)

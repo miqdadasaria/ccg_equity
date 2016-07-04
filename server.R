@@ -36,9 +36,14 @@ shinyServer(function(input, output) {
   
   output$caterpillar_plot = renderPlot({
     ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
-    print(caterpillar_plot(ccg_data, ccg_code, national_sii))
+    print(caterpillar_plot(ccg_data, ccg_code, national_sii[2]))
   })
-			
+	
+  output$similar_caterpillar_plot = renderPlot({
+    ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
+    print(similar_caterpillar_plot(ccg_mappings, ccg_data, ccg_code))
+  })
+  
 	output$similar_agi_data = renderDataTable({
 	  ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
 	  print(similar_ccg_table(ccg_data, ccg_mappings, ccg_code))

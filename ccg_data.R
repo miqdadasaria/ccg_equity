@@ -5,7 +5,6 @@
 ###############################################################################
 
 library(rgdal)
-library(rgeos)
 library(leaflet)
 library(dplyr)
 library(ggplot2)
@@ -29,7 +28,7 @@ load_ccg_mappings = function(){
 }
 
 calculate_similar_ccg_AGI = function(ccg, lsoa_data){
-  similar_data = lsoa_data %>% filter(CCG16CDH %in% ccg[paste("similar_ccg_",1:10,sep="")])
+  similar_data = lsoa_data %>% filter(CCG16CDH %in% ccg[c("CCG16CDH",paste("similar_ccg_",1:10,sep=""))])
   model = lm(age_stdrate~imdscaled, data=similar_data, weights=population)
   
   return(c(coef(model),sqrt(vcov(model)[2,2])))  
@@ -65,12 +64,12 @@ calculate_ccg_data = function(lsoa_data, ccg_mappings){
     ungroup() %>%
     select(CCG16CDH,CCG16CD,CCG16NM,total_pop,mean,IMD,
            AGI,AGI_intercept,AGI_LCI,AGI_UCI,RGI,
-           similar_AGI,similar_AGI_intercept,similar_AGI_LCI,similar_AGI_UCI,RGI)
+           similar_AGI,similar_AGI_intercept,similar_AGI_LCI,similar_AGI_UCI,similar_RGI)
   
   return(ccg_data)
 }
 
-caterpillar_plot = function(ccg_data, ccg_code, national_sii){
+caterpillar_plot = function(ccg_data, ccg_code, benchmark_sii){
   cat_data = ccg_data %>% arrange(desc(AGI))
   cat_data[,"AGI_RANK"] = (1:nrow(cat_data))/nrow(cat_data)
   
@@ -79,16 +78,15 @@ caterpillar_plot = function(ccg_data, ccg_code, national_sii){
   caterpillar = ggplot() +
     geom_point(data=cat_data, aes(x=AGI_RANK, y=AGI), size=1, colour="darkgrey") +
     geom_errorbar(data=cat_data, aes(x=AGI_RANK, ymin=AGI_LCI, ymax=AGI_UCI), colour="darkgrey") +
-    geom_point(data=cat_data,aes(x=AGI_RANK, y=similar_AGI), size=1, colour="red") +
+    geom_point(aes(x=0, y=benchmark_sii), size=1, colour="white") +
     geom_point(data=ccg, aes(x=AGI_RANK, y=AGI), size=1, colour="black") +
     geom_errorbar(data=ccg, aes(x=AGI_RANK, ymin=AGI_LCI, ymax=AGI_UCI), width=1/nrow(cat_data), colour="black") +
     xlab("CCG equity rank") + 
     ylab("AGI") +
     ggtitle(ccg$CCG16NM) +
-    geom_hline(yintercept=national_sii[2], colour="red", linetype=2) +
+    geom_hline(yintercept=benchmark_sii, colour="red", linetype=2) +
     scale_y_continuous(labels = comma) +
     scale_x_continuous(breaks=seq(0,1,0.2), labels=c("least equitable","","","","","most equitable")) +
-    #scale_color_manual(values=c("red","darkgrey","black"),labels=c("Similar CCGs AGI","CCG AGI","Selected CCG AGI")) +
     theme_bw() +
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
@@ -99,9 +97,16 @@ caterpillar_plot = function(ccg_data, ccg_code, national_sii){
   return(caterpillar)
 }
 
+similar_caterpillar_plot = function(ccg_mappings, ccg_data, ccg_code){
+  similar = ccg_mappings %>% filter(CCG16CDH==ccg_code) %>% select(similar_ccg_1:similar_ccg_10)
+  similar_ccg_data = ccg_data %>% filter(CCG16CDH %in% c(ccg_code,similar))
+  ccg = ccg_data %>% filter(CCG16CDH %in% c(ccg_code))
+  return(caterpillar_plot(similar_ccg_data,ccg_code,ccg$similar_AGI))
+}  
+
 scatter_plot = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
   
-  scatter_data = lsoa_data %>% filter(CCG16CDH==ccg_code)
+  scatter_data = lsoa_data %>% filter(CCG16CDH==ccg_code & population>50)
   ccg = ccg_data %>% filter(CCG16CDH==ccg_code)
   
   # set up the AGI lines
@@ -112,13 +117,13 @@ scatter_plot = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
   
 
   agi_lines = as.data.frame(rbind(
-    cbind(x,national_agi,"national"),
-    cbind(x,similar_agi,"similar"),
-    cbind(x,ccg_agi,"ccg")), 
+    cbind(x,national_agi,"National"),
+    cbind(x,similar_agi,"Similar CCGs"),
+    cbind(x,ccg_agi,"Selected CCG")), 
     row.names = FALSE,
     stringsAsFactors = FALSE)
   names(agi_lines) = c("imd","AGI","level")
-  agi_lines$level = as.factor(agi_lines$level)
+  agi_lines$level = factor(agi_lines$level,levels=c("National","Similar CCGs","Selected CCG"))
   agi_lines$imd = as.double(agi_lines$imd)
   agi_lines$AGI = as.double(agi_lines$AGI)
   
@@ -136,7 +141,10 @@ scatter_plot = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
     ylab("standardised rate") +
     ggtitle(ccg$CCG16NM) + 
     scale_x_continuous(breaks=seq(0,1,0.2), labels=c("least deprived","","","","","most deprived")) +
-    geom_line(data=agi_lines, aes(x=imd, y=AGI, group=level, colour=level, linetype=level)) +	
+    scale_color_manual(name="AGI Trend", values=c("red","blue","green"), labels=c("National","Similar CCGs","Selected CCG")) +
+    scale_linetype_manual(name="AGI Trend", values=1:3) + 
+    scale_size_continuous(name="Population") +
+    geom_line(data=agi_lines, size=1.5, aes(x=imd, y=AGI, group=level, colour=level, linetype=level)) +	
     theme_bw() +
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
@@ -244,11 +252,28 @@ all_ccg_table = function(ccg_data){
 similar_ccg_table = function(ccg_data, ccg_mappings, ccg_code){
   similar = ccg_mappings %>% filter(CCG16CDH==ccg_code) %>% select(similar_ccg_1:similar_ccg_10)
   similar_table = ccg_data %>% filter(CCG16CDH %in% c(ccg_code,similar)) %>%
-    mutate(Population=round(total_pop),IMD=round(IMD,2),Average=round(mean),AGI=round(AGI),AGI_LCI=round(AGI_LCI),AGI_UCI=round(AGI_UCI),RGI=round(RGI,2)) %>%
+    mutate(Population=round(total_pop),
+           IMD=round(IMD,2),
+           Average=round(mean),
+           AGI=round(AGI),
+           AGI_LCI=round(AGI_LCI),
+           AGI_UCI=round(AGI_UCI),
+           RGI=round(RGI,2)) %>%
     select(CCG16NM,Population,IMD,Average,AGI,AGI_LCI,AGI_UCI,RGI) %>%
       arrange(CCG16NM)
-  
-  return(similar_table)
+  ccg = ccg_data %>% filter(CCG16CDH %in% c(ccg_code))
+  aggregate = similar_table %>% summarise(CCG16NM="Aggregate across group of similar CCGs",
+                              IMD=round(weighted.mean(IMD, Average),2),
+                              Average=round(weighted.mean(Population, Average)),
+                              AGI=round(ccg$similar_AGI),
+                              AGI_LCI=round(ccg$similar_AGI_LCI),
+                              AGI_UCI=round(ccg$similar_AGI_UCI),
+                              RGI=round(ccg$similar_RGI,2),
+                              Population=sum(Population))
+  results_table = bind_rows(aggregate,similar_table) %>% 
+    select(CCG16NM,Population,IMD,Average,AGI,AGI_LCI,AGI_UCI,RGI)                            
+    
+  return(results_table)
 }
 
 # generate some results
