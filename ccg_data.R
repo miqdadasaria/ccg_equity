@@ -14,7 +14,10 @@ library(htmltools)
 load_lsoa_data = function(){
   lsoa_data = read.csv("data/ccg_lsoa_data.csv", stringsAsFactors=FALSE)
   lsoa_data$age_stdrate = as.double(gsub(",","",lsoa_data$age_stdrate))
-  lsoa_data = lsoa_data %>% select(CCG16CDH=CCG,population,admissions,expectedadmissions,imdscaled,age_stdrate)
+  lsoa_data = lsoa_data %>% 
+    select(CCG16CDH=CCG,population,admissions,expectedadmissions,imdscaled,age_stdrate) %>%
+    filter(population>1)
+  
   return(lsoa_data)
 }
 
@@ -142,7 +145,7 @@ scatter_plot = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
     ggtitle(ccg$CCG16NM) + 
     scale_x_continuous(breaks=seq(0,1,0.2), labels=c("least deprived","","","","","most deprived")) +
     scale_color_manual(name="AGI Trend", values=c("red","blue","green"), labels=c("National","Similar CCGs","Selected CCG")) +
-    scale_linetype_manual(name="AGI Trend", values=1:3) + 
+    scale_linetype_manual(name="AGI Trend", values=c(1,2,4)) + 
     scale_size_continuous(name="Population") +
     geom_line(data=agi_lines, size=1.5, aes(x=imd, y=AGI, group=level, colour=level, linetype=level)) +	
     theme_bw() +
