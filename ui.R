@@ -7,10 +7,11 @@
 library(shiny)
 library(leaflet)
 
-shinyUI(pageWithSidebar(
+shinyUI(fluidPage(
 			
-	# Application title
-	headerPanel("CCG Equity Indicators"),
+  tags$head(includeScript("google-analytics.js")),
+  
+	titlePanel("CCG Equity Indicators"),
 				
 	sidebarPanel(
 	  withTags({
