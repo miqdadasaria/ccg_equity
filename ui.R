@@ -39,6 +39,9 @@ shinyUI(fluidPage(
 				  tabPanel("Caterpillar Similar CCGs", plotOutput("similar_caterpillar_plot")),
 				  tabPanel("Similar CCGs", dataTableOutput("similar_agi_data")),
 				  tabPanel("All CCGs", dataTableOutput("ccg_agi_data"))
+				),
+				tags$div(
+				  HTML("<a href='http://www.york.ac.uk/about/legal-statements/'>University of York Disclaimer</a>")
 				)
 					
 		)
