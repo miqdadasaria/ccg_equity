@@ -26,7 +26,12 @@ shinyUI(fluidPage(
 	  
 	    selectInput("trim", "Trim outliers beyond 95% CI of mean on scatter plots:",
 	            list("True" = "TRUE",
-	                 "False" = "FALSE"), selected="TRUE")
+	                 "False" = "FALSE"), selected="TRUE"),
+	  
+	  tags$div(
+	    HTML("<a href='http://www.york.ac.uk/about/legal-statements/'>University of York Disclaimer</a>")
+	  )
+	  
 	),
 	
 	mainPanel(
@@ -41,7 +46,14 @@ shinyUI(fluidPage(
 				  tabPanel("All CCGs", dataTableOutput("ccg_agi_data"))
 				),
 				tags$div(
-				  HTML("<a href='http://www.york.ac.uk/about/legal-statements/'>University of York Disclaimer</a>")
+				  HTML("<p>&nbsp;<p>This site was produced by <a href='https://www.york.ac.uk/che/staff/research/miqdad-asaria/'>Miqdad Asaria</a> 
+                as part of the <a href='https://www.york.ac.uk/che/research/equity/monitoring/'>Health Equity Indicators</a> project 
+                at the <a href='https://www.york.ac.uk/che'>Centre of Health Economics</a> at the 
+				        <a href='https://www.york.ac.uk/'>University of York</a>. 
+				        Source code can be found <a href='https://github.com/miqdadasaria/ccg_equity'>here</a>.
+				        <p>Contains National Statistics data © Crown copyright and database right 2016
+				        <p>Contains OS data © Crown copyright and database right 2016
+				        <p>Data licensed under the <a href='http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/'>Open Government Licence v3.0</a>")
 				)
 					
 		)
