@@ -11,12 +11,12 @@ shinyUI(fluidPage(
 			
   tags$head(includeScript("google-analytics.js")),
   
-	titlePanel("CCG Equity Indicators"),
+	titlePanel("CCG Inequality Indicators"),
 				
 	sidebarPanel(
 	  withTags({
 	    div(class="header", checked=NA,
-	        p(b("unplanned hospitalisation for chronic ambulatory care sensitive conditions")),
+	        p(b("Unplanned hospitalisation for chronic ambulatory care sensitive conditions 2015/16")),
 	        a(href="http://jech.bmj.com/content/early/2016/01/12/jech-2015-206742.full", "More details"),
 	        p("")
 	    )
@@ -29,7 +29,12 @@ shinyUI(fluidPage(
 	                 "False" = "FALSE"), selected="TRUE"),
 	  
 	  tags$div(
-	    HTML("<a href='http://www.york.ac.uk/about/legal-statements/'>University of York Disclaimer</a>")
+	    HTML("<p>This site was produced by <a href='https://www.york.ac.uk/che/staff/research/miqdad-asaria/'>Miqdad Asaria</a> 
+           as part of the <a href='https://www.york.ac.uk/che/research/equity/monitoring/'>Health Equity Indicators</a> project 
+	         at the <a href='https://www.york.ac.uk/che'>Centre of Health Economics</a> at the 
+	         <a href='https://www.york.ac.uk/'>University of York</a>. 
+	         Source code can be found <a href='https://github.com/miqdadasaria/ccg_equity'>here</a>.
+	         <p><a href='http://www.york.ac.uk/about/legal-statements/'>University of York Disclaimer</a>")
 	  )
 	  
 	),
@@ -46,12 +51,21 @@ shinyUI(fluidPage(
 				  tabPanel("All CCGs", dataTableOutput("ccg_agi_data"))
 				),
 				tags$div(
-				  HTML("<p>&nbsp;<p>This site was produced by <a href='https://www.york.ac.uk/che/staff/research/miqdad-asaria/'>Miqdad Asaria</a> 
-                as part of the <a href='https://www.york.ac.uk/che/research/equity/monitoring/'>Health Equity Indicators</a> project 
-                at the <a href='https://www.york.ac.uk/che'>Centre of Health Economics</a> at the 
-				        <a href='https://www.york.ac.uk/'>University of York</a>. 
-				        Source code can be found <a href='https://github.com/miqdadasaria/ccg_equity'>here</a>.
-				        <p>Contains National Statistics data © Crown copyright and database right 2016
+				  HTML("<p>&nbsp;<p>
+                <p>CCG is the <a href='https://en.wikipedia.org/wiki/Clinical_commissioning_group'>clinical commisioning group</a>
+                these are the organisations that deliver health services in the NHS;
+                AGI is the <a href='http://www.yhpho.org.uk/resource/item.aspx?RID=94925'>absolute gradient index</a> measuring the modelled absolute gap in
+                standardised rates between the most and least deprived areas at the local level; 
+                RGI is the <a href='https://en.wikipedia.org/wiki/Relative_index_of_inequality'>relative gradient index</a> measuring the modelled proportionate gap in 
+                standardised rates between the most and least deprived areas at the local level; 
+                IMD is the <a href='https://www.gov.uk/government/statistics/english-indices-of-deprivation-2015'>index of multiple deprivation</a> 2015 normalised rank 
+                and aggegated to CCG level with a higher value indicating greater deprivation;
+                Population is the <a href='https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates'>ONS mid-year population</a> at LSOA level attributed to CCGs; 
+                Standardised rate is the rate of <a href='https://data.england.nhs.uk/dataset/nhsof-2-6-unplanned-hospitalisation-for-chronic-ambulatory-care-sensitive-conditions'>unplanned hospitalisation for chronic ambulatory care sensitive conditions</a> over the year
+                per 100,000 of population indirectly standardised for age and sex;
+                <p>The scatter plot shows LSOAs within CCGs with the size of the point representing the population that the LSOA contributes to the CCG
+	              <p>The caterpillar plot show CCG AGI values and their 95% confidence intervals with the average across all CCGs plotted represented by the red dashed line
+   			        <p>Contains National Statistics data © Crown copyright and database right 2016
 				        <p>Contains OS data © Crown copyright and database right 2016
 				        <p>Data licensed under the <a href='http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/'>Open Government Licence v3.0</a>")
 				)
