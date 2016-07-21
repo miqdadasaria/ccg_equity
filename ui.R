@@ -33,7 +33,7 @@ shinyUI(fluidPage(
            as part of the <a href='https://www.york.ac.uk/che/research/equity/monitoring/'>Health Equity Indicators</a> project 
 	         at the <a href='https://www.york.ac.uk/che'>Centre of Health Economics</a> at the 
 	         <a href='https://www.york.ac.uk/'>University of York</a>. 
-	         Source code can be found <a href='https://github.com/miqdadasaria/ccg_equity'>here</a>.
+	         <p>Source code can be found <a href='https://github.com/miqdadasaria/ccg_equity'>here</a>.
 	         <p><a href='http://www.york.ac.uk/about/legal-statements/'>University of York Disclaimer</a>")
 	  )
 	  

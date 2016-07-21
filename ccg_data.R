@@ -245,8 +245,8 @@ colour_map = function(ccg_map){
 
 all_ccg_table = function(ccg_data){
   ccg_table = ccg_data %>% 
-    mutate(CCG16NM,Population=round(total_pop),IMD=round(IMD,2),Average=round(mean),AGI=round(AGI),`Cluster AGI`=round(similar_AGI),RGI=round(RGI,2)) %>%
-    select(CCG16NM,Population,IMD,Average,AGI,`Cluster AGI`,RGI) %>% 
+    mutate(CCG16NM,Population=round(total_pop),IMD=round(IMD,2),Average=round(mean),AGI=round(AGI),`Similar CCG AGI`=round(similar_AGI),RGI=round(RGI,2)) %>%
+    select(CCG16NM,Population,IMD,Average,AGI,`Similar CCG AGI`,RGI) %>% 
     arrange(CCG16NM)
     
   return(ccg_table)
