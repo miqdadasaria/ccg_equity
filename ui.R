@@ -9,7 +9,8 @@ library(leaflet)
 
 shinyUI(fluidPage(
 			
-  tags$head(includeScript("google-analytics.js")),
+  tags$head(tags$meta(name="description", content="Compare NHS Clinical Commisioning Group performance on health inequality based on data from the 2015/16 NHS CCG IAF."),
+            includeScript("google-analytics.js")),
   
 	titlePanel("CCG Inequality Indicators"),
 				
