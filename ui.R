@@ -30,7 +30,8 @@ shinyUI(fluidPage(
 	                 "False" = "FALSE"), selected="TRUE"),
 	  
 	  tags$div(
-	    HTML("<p>This site was produced by <a href='https://www.york.ac.uk/che/staff/research/miqdad-asaria/'>Miqdad Asaria</a> 
+	    HTML("<img src='UOY-Logo.svg' alt='University of York' width=90%/>
+           <p>This site was produced by <a href='https://www.york.ac.uk/che/staff/research/miqdad-asaria/'>Miqdad Asaria</a> 
            as part of the <a href='https://www.york.ac.uk/che/research/equity/monitoring/'>Health Equity Indicators</a> project 
 	         at the <a href='https://www.york.ac.uk/che'>Centre of Health Economics</a> at the 
 	         <a href='https://www.york.ac.uk/'>University of York</a>. 
