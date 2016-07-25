@@ -282,8 +282,10 @@ similar_ccg_table = function(ccg_data, ccg_mappings, ccg_code){
 # generate some results
 lsoa_data = load_lsoa_data()
 ccg_mappings = load_ccg_mappings()
-national_sii = coef(lm(age_stdrate~imdscaled, data=lsoa_data, weights=population))
 ccg_data = calculate_ccg_data(lsoa_data, ccg_mappings)
+
+national_lm = lm(age_stdrate~imdscaled, data=lsoa_data, weights=population)
+national_sii = coef(national_lm)
 
 ccg_map = ccg_map(ccg_data)
 popup_messages = make_popup_messages(ccg_map)
