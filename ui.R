@@ -18,7 +18,7 @@ shinyUI(fluidPage(
 	  withTags({
 	    div(class="header", checked=NA,
 	        p(b("Unplanned hospitalisation for chronic ambulatory care sensitive conditions 2015/16")),
-	        a(href="http://jech.bmj.com/content/early/2016/01/12/jech-2015-206742.full", "More details"),
+	        a(href="http://www.nhs.uk/Scorecard/Pages/IndicatorFacts.aspx?MetricId=463", "More details"),
 	        p("")
 	    )
 	  }),
