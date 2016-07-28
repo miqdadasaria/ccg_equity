@@ -148,8 +148,8 @@ scatter_plot = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
     ylab("standardised rate") +
     ggtitle(ccg$CCG16NM) + 
     scale_x_continuous(breaks=seq(0,1,0.2), labels=c("least deprived","","","","","most deprived")) +
-    scale_color_manual(name="AGI Trend", values=c("red","blue","green"), labels=c("National","Similar CCGs","Selected CCG")) +
-    scale_linetype_manual(name="AGI Trend", values=c(1,2,4)) + 
+    scale_color_manual(name="AGI Trend", values=c("firebrick4","dodgerblue4","forestgreen"), labels=c("National","Similar CCGs","Selected CCG")) +
+    scale_linetype_manual(name="AGI Trend", values=c(2,3,1)) + 
     scale_size_continuous(name="Population") +
     geom_line(data=agi_lines, size=1.5, aes(x=imd, y=AGI, group=level, colour=level, linetype=level)) +	
     get_plot_theme()
