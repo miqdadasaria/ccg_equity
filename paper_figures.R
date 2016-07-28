@@ -152,11 +152,11 @@ summary_stats_for_journal_article = function(national_lm, ccg_data){
   national_sii_uci = national_sii["imdscaled"] + qnorm((1+0.95)/2)*national_sii_se
   national_sii_lci = national_sii["imdscaled"] - qnorm((1+0.95)/2)*national_sii_se
   
-  better_than_average_ccgs = ccg_data %>% filter(AGI_LCI > national_sii_uci) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
-  worse_than_average_ccgs = ccg_data %>% filter(AGI_UCI < national_sii_lci) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
+  worse_than_average_ccgs = ccg_data %>% filter(AGI_LCI > national_sii_uci) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
+  better_than_average_ccgs = ccg_data %>% filter(AGI_UCI < national_sii_lci) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
   
-  better_than_similar_ccgs = ccg_data %>% filter(AGI_LCI > similar_AGI_UCI) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
-  worse_than_similar_ccgs = ccg_data %>% filter(AGI_UCI < similar_AGI_LCI) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
+  worse_than_similar_ccgs = ccg_data %>% filter(AGI_LCI > similar_AGI_UCI) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
+  better_than_similar_ccgs = ccg_data %>% filter(AGI_UCI < similar_AGI_LCI) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
   
   better_than_both_ccgs = intersect(better_than_average_ccgs, better_than_similar_ccgs)
   worse_than_both_ccgs = intersect(worse_than_average_ccgs, worse_than_similar_ccgs)
