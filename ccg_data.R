@@ -72,6 +72,15 @@ calculate_ccg_data = function(lsoa_data, ccg_mappings){
   return(ccg_data)
 }
 
+get_plot_theme = function(){
+  theme = theme_bw() + theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          plot.title = element_text(family = "Roboto", colour = "#3e3f3a", lineheight=.8, face="bold", size=rel(1.5)),
+          plot.margin = unit(c(1, 1, 1, 1), "lines"),
+          text=element_text(family = "Roboto", colour = "#3e3f3a"))
+  return(theme)
+}
+
 caterpillar_plot = function(ccg_data, ccg_code, benchmark_sii){
   cat_data = ccg_data %>% arrange(desc(AGI))
   cat_data[,"AGI_RANK"] = (1:nrow(cat_data))/nrow(cat_data)
@@ -90,12 +99,7 @@ caterpillar_plot = function(ccg_data, ccg_code, benchmark_sii){
     geom_hline(yintercept=benchmark_sii, colour="red", linetype=2) +
     scale_y_continuous(labels = comma) +
     scale_x_continuous(breaks=seq(0,1,0.2), labels=c("least equitable","","","","","most equitable")) +
-    theme_bw() +
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(), 
-          plot.title = element_text(lineheight=.8, face="bold", size=rel(1.7)),
-          plot.margin = unit(c(1, 1, 1, 1), "lines")
-          )
+    get_plot_theme()
   
   return(caterpillar)
 }
@@ -148,12 +152,7 @@ scatter_plot = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
     scale_linetype_manual(name="AGI Trend", values=c(1,2,4)) + 
     scale_size_continuous(name="Population") +
     geom_line(data=agi_lines, size=1.5, aes(x=imd, y=AGI, group=level, colour=level, linetype=level)) +	
-    theme_bw() +
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(), 
-          plot.title = element_text(lineheight=.8, face="bold", size=rel(1.7)),
-          plot.margin = unit(c(1, 1, 1, 1), "lines")
-    )
+    get_plot_theme()
  
   return(scatter) 
 }
