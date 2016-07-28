@@ -6,6 +6,7 @@
 
 library(shiny)
 library(leaflet)
+library(DT)
 
 shinyUI(fluidPage(theme = "sandstone.css",
 			

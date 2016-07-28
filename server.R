@@ -26,17 +26,17 @@ shinyServer(function(input, output) {
   })
 
   output$title = renderText({
-    print(selected_ccg$name)
+    selected_ccg$name
   })
   
   output$scatter_plot = renderPlot({
     ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
-    print(scatter_plot(lsoa_data, ccg_data, ccg_code, national_sii, input$trim))
+    scatter_plot(lsoa_data, ccg_data, ccg_code, national_sii, input$trim)
   })
   
   output$caterpillar_plot = renderPlot({
     ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
-    print(caterpillar_plot(ccg_data, ccg_code, national_sii[2]))
+    caterpillar_plot(ccg_data, ccg_code, national_sii[2])
   })
 	
   output$similar_caterpillar_plot = renderPlot({
@@ -46,15 +46,24 @@ shinyServer(function(input, output) {
   
 	output$similar_agi_data = renderDataTable({
 	  ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
-	  print(similar_ccg_table(ccg_data, ccg_mappings, ccg_code))
+	  table = similar_ccg_table(ccg_data, ccg_mappings, ccg_code)
+	  datatable(table, 
+	            style = 'bootstrap',
+	            rownames = FALSE,
+	            colnames = gsub("_"," ",colnames(table)),
+	            options = list(pageLength = 12, autoWidth = TRUE))
 	})
 	
 	output$ccg_agi_data = renderDataTable({
-	  print(all_ccg_table(ccg_data))
+	  table = all_ccg_table(ccg_data)
+	  datatable(table,
+	            style = 'bootstrap',
+	            rownames = FALSE,
+	            options = list(pageLength = 25, autoWidth = TRUE))
 	})
 	
 	output$ccg_map = renderLeaflet({
-	  print(choropleth_map)
+	  choropleth_map
 	})
 	
 	observeEvent(input$ccg_map_shape_click$id, {
@@ -73,9 +82,6 @@ shinyServer(function(input, output) {
   	}
 	  output$ccg = renderText({ print(highlight_ccg) })
 	})
-	
-	# observeEvent(input$tabset, {
-	#   leafletProxy("ccg_map", deferUntilFlush = FALSE) %>% clearPopups()
-	# })
+
 	
 })
