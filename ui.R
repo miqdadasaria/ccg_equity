@@ -7,7 +7,7 @@
 library(shiny)
 library(leaflet)
 
-shinyUI(fluidPage(
+shinyUI(fluidPage(theme = "sandstone.css",
 			
   tags$head(tags$meta(name="description", content="Compare NHS Clinical Commisioning Group performance on health inequality based on data from the 2015/16 NHS CCG IAF."),
             includeScript("google-analytics.js")),
