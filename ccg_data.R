@@ -75,7 +75,7 @@ calculate_ccg_data = function(lsoa_data, ccg_mappings){
 get_plot_theme = function(){
   theme = theme_bw() + theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
-          plot.title = element_text(family = "Roboto", colour = "#3e3f3a", lineheight=.8, face="bold", size=rel(1.5)),
+          plot.title = element_blank(),
           plot.margin = unit(c(1, 1, 1, 1), "lines"),
           text=element_text(family = "Roboto", colour = "#3e3f3a"))
   return(theme)
