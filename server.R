@@ -50,8 +50,8 @@ shinyServer(function(input, output) {
 	  datatable(table, 
 	            style = 'bootstrap',
 	            rownames = FALSE,
-	            colnames = gsub("_"," ",colnames(table)),
-	            options = list(pageLength = 12, autoWidth = TRUE))
+	            colnames = gsub("CCG16NM","CCG Name",gsub("_"," ",colnames(table))),
+	            options = list(pageLength = 12, autoWidth = TRUE, dom='ftri'))
 	})
 	
 	output$ccg_agi_data = renderDataTable({
@@ -59,7 +59,8 @@ shinyServer(function(input, output) {
 	  datatable(table,
 	            style = 'bootstrap',
 	            rownames = FALSE,
-	            options = list(pageLength = 25, autoWidth = TRUE))
+	            colnames = gsub("CCG16NM","CCG Name",colnames(table)),
+	            options = list(pageLength = 25, autoWidth = TRUE, dom='ftrpi'))
 	})
 	
 	output$ccg_map = renderLeaflet({
@@ -80,7 +81,7 @@ shinyServer(function(input, output) {
   	if(length(input$ccg_map_shape_mouseover$id)>0){
   	  highlight_ccg = paste0("Click to see details for NHS ",input$ccg_map_shape_mouseover[["id"]]," CCG")
   	}
-	  output$ccg = renderText({ print(highlight_ccg) })
+	  output$ccg = renderText({ highlight_ccg })
 	})
 
 	
