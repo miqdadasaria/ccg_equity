@@ -36,7 +36,7 @@ shinyServer(function(input, output) {
   
   output$caterpillar_plot = renderPlot({
     ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
-    caterpillar_plot(ccg_data, ccg_code, national_sii[2])
+    caterpillar_plot(ccg_data, ccg_code, national_sii[2], national_sii_lci, national_sii_uci)
   })
 	
   output$similar_caterpillar_plot = renderPlot({

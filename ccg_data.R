@@ -81,7 +81,7 @@ get_plot_theme = function(){
   return(theme)
 }
 
-caterpillar_plot = function(ccg_data, ccg_code, benchmark_sii){
+caterpillar_plot = function(ccg_data, ccg_code, benchmark_sii, benchmark_sii_lci, benchmark_sii_uci){
   cat_data = ccg_data %>% arrange(desc(AGI))
   cat_data[,"AGI_RANK"] = (1:nrow(cat_data))/nrow(cat_data)
   
@@ -96,7 +96,9 @@ caterpillar_plot = function(ccg_data, ccg_code, benchmark_sii){
     xlab("CCG equity rank") + 
     ylab("AGI") +
     ggtitle(ccg$CCG16NM) +
+    geom_hline(yintercept=benchmark_sii_lci, colour="red", linetype=3, alpha=0.1) +
     geom_hline(yintercept=benchmark_sii, colour="red", linetype=2) +
+    geom_hline(yintercept=benchmark_sii_uci, colour="red", linetype=3, alpha=0.1) +
     scale_y_continuous(labels = comma) +
     scale_x_continuous(breaks=seq(0,1,0.2), labels=c("least equitable","","","","","most equitable")) +
     get_plot_theme()
@@ -108,7 +110,7 @@ similar_caterpillar_plot = function(ccg_mappings, ccg_data, ccg_code){
   similar = ccg_mappings %>% filter(CCG16CDH==ccg_code) %>% select(similar_ccg_1:similar_ccg_10)
   similar_ccg_data = ccg_data %>% filter(CCG16CDH %in% c(ccg_code,similar))
   ccg = ccg_data %>% filter(CCG16CDH %in% c(ccg_code))
-  return(caterpillar_plot(similar_ccg_data,ccg_code,ccg$similar_AGI))
+  return(caterpillar_plot(similar_ccg_data,ccg_code,ccg$similar_AGI,ccg$similar_AGI_LCI,ccg$similar_AGI_UCI))
 }  
 
 scatter_plot = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
@@ -285,6 +287,9 @@ ccg_data = calculate_ccg_data(lsoa_data, ccg_mappings)
 
 national_lm = lm(age_stdrate~imdscaled, data=lsoa_data, weights=population)
 national_sii = coef(national_lm)
+national_sii_se = sqrt(vcov(national_lm)[2,2]) 
+national_sii_uci = national_sii["imdscaled"] + qnorm((1+0.95)/2)*national_sii_se
+national_sii_lci = national_sii["imdscaled"] - qnorm((1+0.95)/2)*national_sii_se
 
 ccg_map = ccg_map(ccg_data)
 popup_messages = make_popup_messages(ccg_map)
