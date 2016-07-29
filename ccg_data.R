@@ -11,24 +11,24 @@ library(ggplot2)
 library(scales)
 library(htmltools)
 
-load_lsoa_data = function(){
-  lsoa_data = read.csv("data/ccg_lsoa_data.csv", stringsAsFactors=FALSE)
-  lsoa_data$age_stdrate = as.double(gsub(",","",lsoa_data$age_stdrate))
-  lsoa_data = lsoa_data %>% 
-    select(CCG16CDH=CCG,population,admissions,expectedadmissions,imdscaled,age_stdrate) %>%
-    filter(population>1)
-  
-  return(lsoa_data)
-}
-
-load_ccg_mappings = function(){
-  # NHS Newcastle Gateshead CCG (13T) was formed as of the 1st of April 2015 
-  # by the merger of NHS Gateshead CCG (00F), NHS Newcastle North and East CCG (00G)
-  # and NHS Newcastle West CCG (00H).
-  ccg_mappings = read.csv("data/ccg_mappings.csv",stringsAsFactors = FALSE)
-
-  return(ccg_mappings)
-}
+# load_lsoa_data = function(){
+#   lsoa_data = read.csv("data/ccg_lsoa_data.csv", stringsAsFactors=FALSE)
+#   lsoa_data$age_stdrate = as.double(gsub(",","",lsoa_data$age_stdrate))
+#   lsoa_data = lsoa_data %>%
+#     select(CCG16CDH=CCG,population,admissions,expectedadmissions,imdscaled,age_stdrate) %>%
+#     filter(population>1)
+# 
+#   return(lsoa_data)
+# }
+# 
+# load_ccg_mappings = function(){
+#   # NHS Newcastle Gateshead CCG (13T) was formed as of the 1st of April 2015 
+#   # by the merger of NHS Gateshead CCG (00F), NHS Newcastle North and East CCG (00G)
+#   # and NHS Newcastle West CCG (00H).
+#   ccg_mappings = read.csv("data/ccg_mappings.csv",stringsAsFactors = FALSE)
+# 
+#   return(ccg_mappings)
+# }
 
 calculate_similar_ccg_AGI = function(ccg, lsoa_data){
   similar_data = lsoa_data %>% filter(CCG16CDH %in% ccg[c("CCG16CDH",paste("similar_ccg_",1:10,sep=""))])
@@ -37,38 +37,43 @@ calculate_similar_ccg_AGI = function(ccg, lsoa_data){
   return(c(coef(model),sqrt(vcov(model)[2,2])))  
 }
 
-calculate_ccg_data = function(lsoa_data, ccg_mappings){
-  CI_95 = qnorm((1+0.95)/2)
-  ccg_data = lsoa_data %>%
-    mutate(national_rate=100000*sum(admissions)/sum(population)) %>%
-    group_by(CCG16CDH) %>%
-    mutate(total_pop=sum(population),
-           mean=(sum(admissions)/sum(expectedadmissions))*national_rate,
-           IMD=sum(population*imdscaled)/sum(population)) %>%
-    group_by(CCG16CDH,total_pop,mean,IMD) %>%
-    do(model=lm(age_stdrate~imdscaled, data=., weights=population)) %>%
-    mutate(AGI=coef(model)[2],
-           AGI_intercept = coef(model)[1],
-           SE=sqrt(vcov(model)[2,2]),
-           AGI_LCI=AGI-CI_95*SE,
-           AGI_UCI=AGI+CI_95*SE,
-           RGI=AGI/(AGI_intercept+0.5*AGI)) %>%
-    ungroup() %>%
-    select(CCG16CDH,total_pop,mean,IMD,AGI,AGI_intercept,AGI_LCI,AGI_UCI,RGI) %>%
-    left_join(ccg_mappings,by="CCG16CDH") %>%
-    mutate(CCG16NM=trimws(gsub("CCG|NHS","",CCG16NM))) %>%
-    group_by(CCG16CDH,CCG16CD,CCG16NM,total_pop,mean,IMD,AGI,AGI_intercept,AGI_LCI,AGI_UCI,RGI) %>%
-    do(similar=calculate_similar_ccg_AGI(.,lsoa_data)) %>%
-    mutate(similar_AGI=similar[2],
-           similar_AGI_intercept = similar[1],
-           similar_AGI_LCI=similar_AGI-CI_95*similar[3],
-           similar_AGI_UCI=similar_AGI+CI_95*similar[3],
-           similar_RGI=similar_AGI/(similar_AGI_intercept+0.5*similar_AGI)) %>%
-    ungroup() %>%
-    select(CCG16CDH,CCG16CD,CCG16NM,total_pop,mean,IMD,
-           AGI,AGI_intercept,AGI_LCI,AGI_UCI,RGI,
-           similar_AGI,similar_AGI_intercept,similar_AGI_LCI,similar_AGI_UCI,similar_RGI)
-  
+calculate_ccg_data = function(db, cached){
+  if(cached){
+    ccg_data = collect(tbl(db,"ccg_data"))
+  } else {
+    lsoa_data = collect(tbl(db,"lsoa_data"))
+    ccg_mappings = collect(tbl(db,"ccg_mappings"))
+    CI_95 = qnorm((1+0.95)/2)
+    ccg_data = lsoa_data %>%
+      mutate(national_rate=100000*sum(admissions)/sum(population)) %>%
+      group_by(CCG16CDH) %>%
+      mutate(total_pop=sum(population),
+             mean=(sum(admissions)/sum(expectedadmissions))*national_rate,
+             IMD=sum(population*imdscaled)/sum(population)) %>%
+      group_by(CCG16CDH,total_pop,mean,IMD) %>%
+      do(model=lm(age_stdrate~imdscaled, data=., weights=population)) %>%
+      mutate(AGI=coef(model)[2],
+             AGI_intercept = coef(model)[1],
+             SE=sqrt(vcov(model)[2,2]),
+             AGI_LCI=AGI-CI_95*SE,
+             AGI_UCI=AGI+CI_95*SE,
+             RGI=AGI/(AGI_intercept+0.5*AGI)) %>%
+      ungroup() %>%
+      select(CCG16CDH,total_pop,mean,IMD,AGI,AGI_intercept,AGI_LCI,AGI_UCI,RGI) %>%
+      left_join(ccg_mappings,by="CCG16CDH") %>%
+      mutate(CCG16NM=trimws(gsub("CCG|NHS","",CCG16NM))) %>%
+      group_by(CCG16CDH,CCG16CD,CCG16NM,total_pop,mean,IMD,AGI,AGI_intercept,AGI_LCI,AGI_UCI,RGI) %>%
+      do(similar=calculate_similar_ccg_AGI(.,lsoa_data)) %>%
+      mutate(similar_AGI=similar[2],
+             similar_AGI_intercept = similar[1],
+             similar_AGI_LCI=similar_AGI-CI_95*similar[3],
+             similar_AGI_UCI=similar_AGI+CI_95*similar[3],
+             similar_RGI=similar_AGI/(similar_AGI_intercept+0.5*similar_AGI)) %>%
+      ungroup() %>%
+      select(CCG16CDH,CCG16CD,CCG16NM,total_pop,mean,IMD,
+             AGI,AGI_intercept,AGI_LCI,AGI_UCI,RGI,
+             similar_AGI,similar_AGI_intercept,similar_AGI_LCI,similar_AGI_UCI,similar_RGI)
+  }
   return(ccg_data)
 }
 
@@ -159,7 +164,7 @@ scatter_plot = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
   return(scatter) 
 }
 
-ccg_map = function(ccg_data){
+make_ccg_map = function(ccg_data){
   ccg_map = readOGR("data/ccg_map_2016.geojson", "OGRGeoJSON", verbose=FALSE, stringsAsFactors=FALSE)
   ccg_map@data$CCG16NM = trimws(gsub("CCG|NHS","",ccg_map@data$CCG16NM))
   ccg_map@data = left_join(ccg_map@data,ccg_data,by=c("CCG16CD","CCG16NM"))
@@ -178,69 +183,74 @@ make_popup_messages = function(ccg_map){
   return(data_frame(CCG16NM=ccg_map$CCG16NM,message=popup_messages))  
 }
 
-colour_map = function(ccg_map){
-  ccg_map$AGI = round(ccg_map$AGI)
-  popup_message = make_popup_messages(ccg_map)$message
-  
-  agi_pal = colorBin("Blues", ccg_map$AGI, 5, pretty = FALSE)
-  rgi_pal = colorBin("Reds", ccg_map$RGI, 5, pretty = FALSE)
-  imd_pal = colorQuantile("Greens", ccg_map$IMD, n=5)
-  pop_pal = colorBin("Oranges", ccg_map$total_pop, 5, pretty = FALSE)
-  rate_pal = colorBin("Purples", ccg_map$mean, 5, pretty = FALSE)
-  
-  choropleth_map = leaflet(ccg_map) %>% 
-    addProviderTiles("Stamen.TonerLite", options = providerTileOptions(noWrap = TRUE)) %>%
-    addPolygons(stroke = TRUE, 
-                smoothFactor = 1, 
-                fillOpacity = 0.7, 
-                weight = 1, 
-                popup = popup_message, 
-                fillColor = agi_pal(ccg_map$AGI), 
-                color="black",
-                layerId=ccg_map$CCG16NM,
-                group="AGI") %>%
-    # addLegend("topleft", 
-    #           pal = agi_pal, 
-    #           values = ccg_map$AGI, 
-    #           title = "AGI", 
-    #           opacity = 0.7) %>%
-    addPolygons(stroke = TRUE, 
-                smoothFactor = 1, 
-                fillOpacity = 0.7, 
-                weight = 1, 
-                popup = popup_message, 
-                fillColor = rgi_pal(ccg_map$RGI), 
-                color="black",
-                group="RGI") %>%
-    addPolygons(stroke = TRUE, 
-                smoothFactor = 1, 
-                fillOpacity = 0.7, 
-                weight = 1, 
-                popup = popup_message, 
-                fillColor = imd_pal(ccg_map$IMD), 
-                color="black",
-                group="IMD") %>%
-    addPolygons(stroke = TRUE, 
-                smoothFactor = 1, 
-                fillOpacity = 0.7, 
-                weight = 1, 
-                popup = popup_message, 
-                fillColor = pop_pal(ccg_map$total_pop), 
-                color="black",
-                group="Population") %>%
-    addPolygons(stroke = TRUE, 
-                smoothFactor = 1, 
-                fillOpacity = 0.7, 
-                weight = 1, 
-                popup = popup_message, 
-                fillColor = rate_pal(ccg_map$mean), 
-                color="black",
-                group="Standardised Rate") %>%
-    addLayersControl(
-      baseGroups=c("AGI", "RGI", "IMD", "Population", "Standardised Rate"),
-      position = "bottomleft",
-      options = layersControlOptions(collapsed = FALSE)
-    )
+make_choropleth_map = function(ccg_data, cached){
+  if(cached){
+    load("data/choropleth_map.RData")
+  } else {
+    ccg_map = ccg_data %>% make_ccg_map()
+    ccg_map$AGI = round(ccg_map$AGI)
+    popup_message = make_popup_messages(ccg_map)$message
+    
+    agi_pal = colorBin("Blues", ccg_map$AGI, 5, pretty = FALSE)
+    rgi_pal = colorBin("Reds", ccg_map$RGI, 5, pretty = FALSE)
+    imd_pal = colorQuantile("Greens", ccg_map$IMD, n=5)
+    pop_pal = colorBin("Oranges", ccg_map$total_pop, 5, pretty = FALSE)
+    rate_pal = colorBin("Purples", ccg_map$mean, 5, pretty = FALSE)
+    
+    choropleth_map = leaflet(ccg_map) %>% 
+      addProviderTiles("Stamen.TonerLite", options = providerTileOptions(noWrap = TRUE)) %>%
+      addPolygons(stroke = TRUE, 
+                  smoothFactor = 1, 
+                  fillOpacity = 0.7, 
+                  weight = 1, 
+                  popup = popup_message, 
+                  fillColor = agi_pal(ccg_map$AGI), 
+                  color="black",
+                  layerId=ccg_map$CCG16NM,
+                  group="AGI") %>%
+      # addLegend("topleft", 
+      #           pal = agi_pal, 
+      #           values = ccg_map$AGI, 
+      #           title = "AGI", 
+      #           opacity = 0.7) %>%
+      addPolygons(stroke = TRUE, 
+                  smoothFactor = 1, 
+                  fillOpacity = 0.7, 
+                  weight = 1, 
+                  popup = popup_message, 
+                  fillColor = rgi_pal(ccg_map$RGI), 
+                  color="black",
+                  group="RGI") %>%
+      addPolygons(stroke = TRUE, 
+                  smoothFactor = 1, 
+                  fillOpacity = 0.7, 
+                  weight = 1, 
+                  popup = popup_message, 
+                  fillColor = imd_pal(ccg_map$IMD), 
+                  color="black",
+                  group="IMD") %>%
+      addPolygons(stroke = TRUE, 
+                  smoothFactor = 1, 
+                  fillOpacity = 0.7, 
+                  weight = 1, 
+                  popup = popup_message, 
+                  fillColor = pop_pal(ccg_map$total_pop), 
+                  color="black",
+                  group="Population") %>%
+      addPolygons(stroke = TRUE, 
+                  smoothFactor = 1, 
+                  fillOpacity = 0.7, 
+                  weight = 1, 
+                  popup = popup_message, 
+                  fillColor = rate_pal(ccg_map$mean), 
+                  color="black",
+                  group="Standardised Rate") %>%
+      addLayersControl(
+        baseGroups=c("AGI", "RGI", "IMD", "Population", "Standardised Rate"),
+        position = "bottomleft",
+        options = layersControlOptions(collapsed = FALSE)
+      )
+  }
   return(choropleth_map)
 }
 
@@ -281,9 +291,10 @@ similar_ccg_table = function(ccg_data, ccg_mappings, ccg_code){
 }
 
 # generate some results
-lsoa_data = load_lsoa_data()
-ccg_mappings = load_ccg_mappings()
-ccg_data = calculate_ccg_data(lsoa_data, ccg_mappings)
+db = src_sqlite("data/ccg_lsoa_data.sqlite3")
+lsoa_data = collect(tbl(db,"lsoa_data"))
+ccg_mappings = collect(tbl(db,"ccg_mappings"))
+ccg_data = calculate_ccg_data(db, cached=TRUE)
 
 national_lm = lm(age_stdrate~imdscaled, data=lsoa_data, weights=population)
 national_sii = coef(national_lm)
@@ -291,6 +302,4 @@ national_sii_se = sqrt(vcov(national_lm)[2,2])
 national_sii_uci = national_sii["imdscaled"] + qnorm((1+0.95)/2)*national_sii_se
 national_sii_lci = national_sii["imdscaled"] - qnorm((1+0.95)/2)*national_sii_se
 
-ccg_map = ccg_map(ccg_data)
-popup_messages = make_popup_messages(ccg_map)
-choropleth_map = colour_map(ccg_map)
+choropleth_map = make_choropleth_map(ccg_data, cached=TRUE)
