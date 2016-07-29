@@ -304,4 +304,4 @@ national_sii_se = sqrt(vcov(national_lm)[2,2])
 national_sii_uci = national_sii["imdscaled"] + qnorm((1+0.95)/2)*national_sii_se
 national_sii_lci = national_sii["imdscaled"] - qnorm((1+0.95)/2)*national_sii_se
 
-choropleth_map = make_choropleth_map(ccg_data, cached=FALSE)
+choropleth_map = make_choropleth_map(ccg_data, cached=TRUE)
