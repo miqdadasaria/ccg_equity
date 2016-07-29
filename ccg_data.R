@@ -185,72 +185,74 @@ make_popup_messages = function(ccg_map){
 
 make_choropleth_map = function(ccg_data, cached){
   if(cached){
-    load("data/choropleth_map.RData")
+    load("data/ccg_map.RData")
   } else {
     ccg_map = ccg_data %>% make_ccg_map()
-    ccg_map$AGI = round(ccg_map$AGI)
-    popup_message = make_popup_messages(ccg_map)$message
-    
-    agi_pal = colorBin("Blues", ccg_map$AGI, 5, pretty = FALSE)
-    rgi_pal = colorBin("Reds", ccg_map$RGI, 5, pretty = FALSE)
-    imd_pal = colorQuantile("Greens", ccg_map$IMD, n=5)
-    pop_pal = colorBin("Oranges", ccg_map$total_pop, 5, pretty = FALSE)
-    rate_pal = colorBin("Purples", ccg_map$mean, 5, pretty = FALSE)
-    
-    choropleth_map = leaflet(ccg_map) %>% 
-      addProviderTiles("Stamen.TonerLite", options = providerTileOptions(noWrap = TRUE)) %>%
-      addPolygons(stroke = TRUE, 
-                  smoothFactor = 1, 
-                  fillOpacity = 0.7, 
-                  weight = 1, 
-                  popup = popup_message, 
-                  fillColor = agi_pal(ccg_map$AGI), 
-                  color="black",
-                  layerId=ccg_map$CCG16NM,
-                  group="AGI") %>%
-      # addLegend("topleft", 
-      #           pal = agi_pal, 
-      #           values = ccg_map$AGI, 
-      #           title = "AGI", 
-      #           opacity = 0.7) %>%
-      addPolygons(stroke = TRUE, 
-                  smoothFactor = 1, 
-                  fillOpacity = 0.7, 
-                  weight = 1, 
-                  popup = popup_message, 
-                  fillColor = rgi_pal(ccg_map$RGI), 
-                  color="black",
-                  group="RGI") %>%
-      addPolygons(stroke = TRUE, 
-                  smoothFactor = 1, 
-                  fillOpacity = 0.7, 
-                  weight = 1, 
-                  popup = popup_message, 
-                  fillColor = imd_pal(ccg_map$IMD), 
-                  color="black",
-                  group="IMD") %>%
-      addPolygons(stroke = TRUE, 
-                  smoothFactor = 1, 
-                  fillOpacity = 0.7, 
-                  weight = 1, 
-                  popup = popup_message, 
-                  fillColor = pop_pal(ccg_map$total_pop), 
-                  color="black",
-                  group="Population") %>%
-      addPolygons(stroke = TRUE, 
-                  smoothFactor = 1, 
-                  fillOpacity = 0.7, 
-                  weight = 1, 
-                  popup = popup_message, 
-                  fillColor = rate_pal(ccg_map$mean), 
-                  color="black",
-                  group="Standardised Rate") %>%
-      addLayersControl(
-        baseGroups=c("AGI", "RGI", "IMD", "Population", "Standardised Rate"),
-        position = "bottomleft",
-        options = layersControlOptions(collapsed = FALSE)
-      )
-  }
+  }    
+
+  ccg_map$AGI = round(ccg_map$AGI)
+  popup_message = make_popup_messages(ccg_map)$message
+  
+  agi_pal = colorBin("Blues", ccg_map$AGI, 5, pretty = FALSE)
+  rgi_pal = colorBin("Reds", ccg_map$RGI, 5, pretty = FALSE)
+  imd_pal = colorQuantile("Greens", ccg_map$IMD, n=5)
+  pop_pal = colorBin("Oranges", ccg_map$total_pop, 5, pretty = FALSE)
+  rate_pal = colorBin("Purples", ccg_map$mean, 5, pretty = FALSE)
+  
+  choropleth_map = leaflet(ccg_map) %>% 
+    addProviderTiles("Stamen.TonerLite", options = providerTileOptions(noWrap = TRUE)) %>%
+    addPolygons(stroke = TRUE, 
+                smoothFactor = 1, 
+                fillOpacity = 0.7, 
+                weight = 1, 
+                popup = popup_message, 
+                fillColor = agi_pal(ccg_map$AGI), 
+                color="black",
+                layerId=ccg_map$CCG16NM,
+                group="AGI") %>%
+    # addLegend("topleft", 
+    #           pal = agi_pal, 
+    #           values = ccg_map$AGI, 
+    #           title = "AGI", 
+    #           opacity = 0.7) %>%
+    addPolygons(stroke = TRUE, 
+                smoothFactor = 1, 
+                fillOpacity = 0.7, 
+                weight = 1, 
+                popup = popup_message, 
+                fillColor = rgi_pal(ccg_map$RGI), 
+                color="black",
+                group="RGI") %>%
+    addPolygons(stroke = TRUE, 
+                smoothFactor = 1, 
+                fillOpacity = 0.7, 
+                weight = 1, 
+                popup = popup_message, 
+                fillColor = imd_pal(ccg_map$IMD), 
+                color="black",
+                group="IMD") %>%
+    addPolygons(stroke = TRUE, 
+                smoothFactor = 1, 
+                fillOpacity = 0.7, 
+                weight = 1, 
+                popup = popup_message, 
+                fillColor = pop_pal(ccg_map$total_pop), 
+                color="black",
+                group="Population") %>%
+    addPolygons(stroke = TRUE, 
+                smoothFactor = 1, 
+                fillOpacity = 0.7, 
+                weight = 1, 
+                popup = popup_message, 
+                fillColor = rate_pal(ccg_map$mean), 
+                color="black",
+                group="Standardised Rate") %>%
+    addLayersControl(
+      baseGroups=c("AGI", "RGI", "IMD", "Population", "Standardised Rate"),
+      position = "bottomleft",
+      options = layersControlOptions(collapsed = FALSE)
+    )
+
   return(choropleth_map)
 }
 
@@ -302,4 +304,4 @@ national_sii_se = sqrt(vcov(national_lm)[2,2])
 national_sii_uci = national_sii["imdscaled"] + qnorm((1+0.95)/2)*national_sii_se
 national_sii_lci = national_sii["imdscaled"] - qnorm((1+0.95)/2)*national_sii_se
 
-choropleth_map = make_choropleth_map(ccg_data, cached=TRUE)
+choropleth_map = make_choropleth_map(ccg_data, cached=FALSE)
