@@ -13,12 +13,14 @@ shinyServer(function(input, output) {
   selected_ccg = reactiveValues(name="Vale of York")
   
   output$ccg_list = renderUI({
+    withProgress(message = 'Loading list off CCGs',{
     ccgs = ccg_data %>% select(CCG16NM) %>% arrange(CCG16NM)
     default_ccg = ifelse(is.null(selected_ccg$name),"Vale of York",selected_ccg$name)
     selectInput(inputId="ccg_name", 
                 label="Select CCG to show details:", 
                 choices=as.list(t(ccgs$CCG16NM)), 
                 selected=default_ccg)
+    })
   })
   
   observe({
@@ -30,41 +32,53 @@ shinyServer(function(input, output) {
   })
   
   output$scatter_plot = renderPlot({
-    ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
-    scatter_plot(lsoa_data, ccg_data, ccg_code, national_sii, input$trim)
+    withProgress(message = paste0('Drawing scatter plot for ',selected_ccg$name),{
+      ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
+      scatter_plot(lsoa_data, ccg_data, ccg_code, national_sii, input$trim)
+    })
   })
   
   output$caterpillar_plot = renderPlot({
-    ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
-    caterpillar_plot(ccg_data, ccg_code, national_sii[2], national_sii_lci, national_sii_uci)
+    withProgress(message = paste0('Drawing caterpillar plot for ',selected_ccg$name),{
+      ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
+      caterpillar_plot(ccg_data, ccg_code, national_sii[2], national_sii_lci, national_sii_uci)
+    })
   })
 	
   output$similar_caterpillar_plot = renderPlot({
-    ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
-    print(similar_caterpillar_plot(ccg_mappings, ccg_data, ccg_code))
+    withProgress(message = paste0('Drawing similar CCG caterpillar plot for ',selected_ccg$name),{
+      ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
+      print(similar_caterpillar_plot(ccg_mappings, ccg_data, ccg_code))
+    })
   })
   
 	output$similar_agi_data = renderDataTable({
-	  ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
-	  table = similar_ccg_table(ccg_data, ccg_mappings, ccg_code)
-	  datatable(table, 
-	            style = 'bootstrap',
-	            rownames = FALSE,
-	            colnames = gsub("CCG16NM","CCG Name",gsub("_"," ",colnames(table))),
-	            options = list(pageLength = 12, autoWidth = TRUE, dom='ftri'))
+	  withProgress(message = paste0('Loading similar CCG data table for ',selected_ccg$name),{
+	    ccg_code = ccg_data %>% filter(CCG16NM==selected_ccg$name) %>% select(CCG16CDH) %>% as.character()
+  	  table = similar_ccg_table(ccg_data, ccg_mappings, ccg_code)
+  	  datatable(table, 
+        style = 'bootstrap',
+  	    rownames = FALSE,
+  	    colnames = gsub("CCG16NM","CCG Name",gsub("_"," ",colnames(table))),
+  	    options = list(pageLength = 12, autoWidth = TRUE, dom='ftri'))
+	  })
 	})
 	
 	output$ccg_agi_data = renderDataTable({
-	  table = all_ccg_table(ccg_data)
-	  datatable(table,
-	            style = 'bootstrap',
-	            rownames = FALSE,
-	            colnames = gsub("CCG16NM","CCG Name",colnames(table)),
-	            options = list(pageLength = 25, autoWidth = TRUE, dom='ftrpi'))
+	  withProgress(message = 'Loading CCG data table',{
+	    table = all_ccg_table(ccg_data)
+	    datatable(table,
+        style = 'bootstrap',
+	      rownames = FALSE,
+	      colnames = gsub("CCG16NM","CCG Name",colnames(table)),
+	      options = list(pageLength = 25, autoWidth = TRUE, dom='ftrpi'))
+	  })
 	})
 	
 	output$ccg_map = renderLeaflet({
-	  choropleth_map
+	  withProgress(message = 'Generating interactive CCG map...',
+	    choropleth_map
+	  )
 	})
 	
 	observeEvent(input$ccg_map_shape_click$id, {
