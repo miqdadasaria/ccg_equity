@@ -11,25 +11,6 @@ library(ggplot2)
 library(scales)
 library(htmltools)
 
-# load_lsoa_data = function(){
-#   lsoa_data = read.csv("data/ccg_lsoa_data.csv", stringsAsFactors=FALSE)
-#   lsoa_data$age_stdrate = as.double(gsub(",","",lsoa_data$age_stdrate))
-#   lsoa_data = lsoa_data %>%
-#     select(CCG16CDH=CCG,population,admissions,expectedadmissions,imdscaled,age_stdrate) %>%
-#     filter(population>1)
-# 
-#   return(lsoa_data)
-# }
-# 
-# load_ccg_mappings = function(){
-#   # NHS Newcastle Gateshead CCG (13T) was formed as of the 1st of April 2015 
-#   # by the merger of NHS Gateshead CCG (00F), NHS Newcastle North and East CCG (00G)
-#   # and NHS Newcastle West CCG (00H).
-#   ccg_mappings = read.csv("data/ccg_mappings.csv",stringsAsFactors = FALSE)
-# 
-#   return(ccg_mappings)
-# }
-
 calculate_similar_ccg_AGI = function(ccg, lsoa_data){
   similar_data = lsoa_data %>% filter(CCG16CDH %in% ccg[c("CCG16CDH",paste("similar_ccg_",1:10,sep=""))])
   model = lm(age_stdrate~imdscaled, data=similar_data, weights=population)
