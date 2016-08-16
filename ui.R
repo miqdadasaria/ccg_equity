@@ -96,7 +96,7 @@ shinyUI(fluidPage(theme = "sandstone.css",
                                            The greater the value of the AGI the higher the inequality within the 
                                            <a href='https://en.wikipedia.org/wiki/Clinical_commissioning_group'>CCG</a>.
                                            
-                                           <br><br>To calculate the AGI we first calculate the outcome of interest 
+                                           <p><br>To calculate the AGI we first calculate the outcome of interest 
 				                                   for each <a href='http://webarchive.nationalarchives.gov.uk/20160105160709/http://www.ons.gov.uk/ons/guide-method/geography/beginner-s-guide/census/super-output-areas--soas-/index.html'>neighbourhood</a> 
                                            in the country (for example the rate of 
 				                                   emergency hospital admissions per 100,000 population). The calculated
@@ -135,8 +135,32 @@ shinyUI(fluidPage(theme = "sandstone.css",
                                            from the AGI. It is calculated by dividing the AGI by the rate of the 
                                            outcome for the area at the midpoint of the deprivation distribution.
                                            Hence it expresses the inequality as a proportion of the median outcome rate.</dd>
-                                            
-                                           </dl>"
+                                           <p>   
+
+				                                   <dt>Similar CCGs</dt> 
+                                           <dd>For each <a href='https://en.wikipedia.org/wiki/Clinical_commissioning_group'>
+				                                   CCG</a> a group of 10 <a href='https://en.wikipedia.org/wiki/Clinical_commissioning_group'>CCGs</a> 
+				                                   most similar to that <a href='https://en.wikipedia.org/wiki/Clinical_commissioning_group'>CCG</a> is identified. These form the
+				                                   natural comparator group for the <a href='https://en.wikipedia.org/wiki/Clinical_commissioning_group'>CCG</a>. 
+				                                  
+				                                   <p><br>The similar <a href='https://en.wikipedia.org/wiki/Clinical_commissioning_group'>CCG</a>
+				                                   group members are selected based on how closely matched they are on the following criteria:
+				                                   <a href='https://www.gov.uk/government/statistics/english-indices-of-deprivation-2015'>IMD</a> (deprivation) score, 
+				                                   <a href='https://www.gov.uk/government/statistics/english-indices-of-deprivation-2015'>IMD</a> health domain score, 
+				                                   total registered population, 
+				                                   % of population 0-4, 
+				                                   % of population 5-14,
+				                                   % of population 15-24, 
+				                                   % of population 75+, 
+				                                   ratio of registered population to ONS estimates (\"list inflation\"),
+				                                   population density, 
+				                                   slope variation in population density, 
+				                                   % of population black ethnic groups,
+				                                   % of population Asian ethnic groups. 
+				                                   Further details can be found <a href='https://www.learnenv.england.nhs.uk/similar'>here</a>.
+				                                   </dd>
+ 
+				                                  </dl>"
 				                                  )))
 				),
 				tags$div(
