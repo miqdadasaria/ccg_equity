@@ -87,7 +87,7 @@ shinyServer(function(input, output) {
 
 	observeEvent(input$ccg_map_shape_mouseout$id, {
 	  highlight_ccg = "Click on the map or select from the list to view another CCG"
-	  output$ccg = renderText({ print(highlight_ccg) })
+	  output$ccg = renderText({ highlight_ccg })
 	})
 	
 	observeEvent(input$ccg_map_shape_mouseover$id, {
