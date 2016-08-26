@@ -8,18 +8,36 @@ library(shiny)
 source("ccg_data.R")
 
 # Define server logic required to plot various variables against mpg
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   
   selected_ccg = reactiveValues(name="Vale of York")
   
   output$ccg_list = renderUI({
     withProgress(message = 'Loading list off CCGs',{
     ccgs = ccg_data %>% select(CCG16NM) %>% arrange(CCG16NM)
-    default_ccg = ifelse(is.null(selected_ccg$name),"Vale of York",selected_ccg$name)
+    ccg16cdh = ccg_data %>% select(CCG16CDH)
+    
+    url = parseQueryString(session$clientData$url_search)
+    url_ccg_code = NULL
+    url_ccg_name = NULL
+    if(!is.null(url)){
+      url_ccg_code = url[["ccg16cdh"]]
+    }
+    
+    current_ccg = "Vale of York"
+    if(!is.null(selected_ccg$name)){
+      current_ccg = selected_ccg$name
+    } else if(!is.null(url_ccg_code)){
+      if(url_ccg_code %in% ccg16cdh$CCG16CDH){
+        url_ccg_name = ccg_data %>% filter(CCG16CDH == url_ccg_code) %>% select(CCG16NM)
+        current_ccg = url_ccg_name
+      }
+    }
+    
     selectInput(inputId="ccg_name", 
                 label="Select CCG to show details:", 
                 choices=as.list(t(ccgs$CCG16NM)), 
-                selected=default_ccg)
+                selected=current_ccg)
     })
   })
   

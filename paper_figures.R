@@ -6,6 +6,7 @@
 
 source("ccg_data.R")
 library(tidyr)
+library(grid)
 
 figure_1 = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
   
@@ -92,12 +93,12 @@ trim = function(scatter_data,CI=0.95){
 
 figure_3 = function(lsoa_data, ccg_data, national_sii){
   
-  scatter_data_HD_GP = lsoa_data %>% filter(CCG16CDH=="05W" & population>50) %>% mutate(performance="Good Performance", deprivation="High Deprivation") %>% trim()
-  scatter_data_HD_BP = lsoa_data %>% filter(CCG16CDH=="99A" & population>50) %>% mutate(performance="Bad Performance", deprivation="High Deprivation") %>% trim()
-  scatter_data_AD_GP = lsoa_data %>% filter(CCG16CDH=="02V" & population>50) %>% mutate(performance="Good Performance", deprivation="Average Deprivation") %>% trim()
-  scatter_data_AD_BP = lsoa_data %>% filter(CCG16CDH=="00L" & population>50) %>% mutate(performance="Bad Performance", deprivation="Average Deprivation") %>% trim()
-  scatter_data_LD_GP = lsoa_data %>% filter(CCG16CDH=="03E" & population>50) %>% mutate(performance="Good Performance", deprivation="Low Deprivation") %>% trim()
-  scatter_data_LD_BP = lsoa_data %>% filter(CCG16CDH=="11C" & population>50) %>% mutate(performance="Bad Performance", deprivation="Low Deprivation") %>% trim()
+  scatter_data_HD_GP = lsoa_data %>% filter(CCG16CDH=="07P" & population>50) %>% mutate(performance="Better Equity", deprivation="High Deprivation") %>% trim()
+  scatter_data_HD_BP = lsoa_data %>% filter(CCG16CDH=="99A" & population>50) %>% mutate(performance="Worse Equity", deprivation="High Deprivation") %>% trim()
+  scatter_data_AD_GP = lsoa_data %>% filter(CCG16CDH=="09C" & population>50) %>% mutate(performance="Better Equity", deprivation="Average Deprivation") %>% trim()
+  scatter_data_AD_BP = lsoa_data %>% filter(CCG16CDH=="03K" & population>50) %>% mutate(performance="Worse Equity", deprivation="Average Deprivation") %>% trim()
+  scatter_data_LD_GP = lsoa_data %>% filter(CCG16CDH=="09X" & population>50) %>% mutate(performance="Better Equity", deprivation="Low Deprivation") %>% trim()
+  scatter_data_LD_BP = lsoa_data %>% filter(CCG16CDH=="11C" & population>50) %>% mutate(performance="Worse Equity", deprivation="Low Deprivation") %>% trim()
   
   scatter_data = bind_rows(scatter_data_HD_GP,
                            scatter_data_HD_BP,
@@ -106,7 +107,7 @@ figure_3 = function(lsoa_data, ccg_data, national_sii){
                            scatter_data_LD_GP,
                            scatter_data_LD_BP) %>% filter(age_stdrate<2500)
   
-  scatter_data$performance = factor(scatter_data$performance, levels=c("Bad Performance", "Good Performance"))
+  scatter_data$performance = factor(scatter_data$performance, levels=c("Worse Equity", "Better Equity"))
   scatter_data$deprivation = factor(scatter_data$deprivation, levels=c("Low Deprivation", "Average Deprivation", "High Deprivation"))
   
   groups = scatter_data %>% select(CCG16CDH,performance,deprivation) %>% distinct()
@@ -141,6 +142,10 @@ figure_3 = function(lsoa_data, ccg_data, national_sii){
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
           plot.title = element_text(lineheight=.8, face="bold", size=rel(1.7)),
+          strip.text = element_text(size=22),
+          axis.text = element_text(size=14),
+          axis.title=element_text(size=22),
+          panel.margin = unit(3, "lines"),
           plot.margin = unit(c(1, 1, 1, 1), "lines")
     )
   
@@ -152,15 +157,23 @@ summary_stats_for_journal_article = function(national_lm, ccg_data){
   national_sii_uci = national_sii["imdscaled"] + qnorm((1+0.95)/2)*national_sii_se
   national_sii_lci = national_sii["imdscaled"] - qnorm((1+0.95)/2)*national_sii_se
   
-  worse_than_average_ccgs = ccg_data %>% filter(AGI_LCI > national_sii_uci) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
-  better_than_average_ccgs = ccg_data %>% filter(AGI_UCI < national_sii_lci) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
+  worse_than_average_ccgs = ccg_data %>% filter(AGI_LCI > national_sii_uci) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI,IMD,CCG16CDH)
+  better_than_average_ccgs = ccg_data %>% filter(AGI_UCI < national_sii_lci) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI,IMD,CCG16CDH)
   
-  worse_than_similar_ccgs = ccg_data %>% filter(AGI_LCI > similar_AGI_UCI) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
-  better_than_similar_ccgs = ccg_data %>% filter(AGI_UCI < similar_AGI_LCI) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI)
+  worse_than_similar_ccgs = ccg_data %>% filter(AGI_LCI > similar_AGI_UCI) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI,IMD,CCG16CDH)
+  better_than_similar_ccgs = ccg_data %>% filter(AGI_UCI < similar_AGI_LCI) %>% select(CCG16NM,AGI,AGI_LCI,AGI_UCI,IMD,CCG16CDH)
   
   better_than_both_ccgs = intersect(better_than_average_ccgs, better_than_similar_ccgs)
   worse_than_both_ccgs = intersect(worse_than_average_ccgs, worse_than_similar_ccgs)
   
+  
+  sink(file="output/better_equity_ccgs.txt")
+  print(better_than_both_ccgs)
+  sink()
+  
+  sink(file="output/worse_equity_ccgs.txt")
+  print(worse_than_both_ccgs)
+  sink()
   
   correlation_bw_imd_similar_agi = cor(ccg_data$IMD,ccg_data$similar_AGI,method="pearson")
   
