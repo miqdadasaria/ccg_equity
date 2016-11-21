@@ -7,7 +7,6 @@
 library(shiny)
 source("ccg_data.R")
 
-# Define server logic required to plot various variables against mpg
 shinyServer(function(input, output, session) {
   
   selected_ccg = reactiveValues(name="Vale of York")
