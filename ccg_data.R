@@ -260,8 +260,8 @@ similar_ccg_table = function(ccg_data, ccg_mappings, ccg_code){
       arrange(CCG16NM)
   ccg = ccg_data %>% filter(CCG16CDH %in% c(ccg_code))
   aggregate = similar_table %>% summarise(CCG16NM="Aggregate across group of similar CCGs",
-                              IMD=round(weighted.mean(IMD, Average),2),
-                              Average=round(weighted.mean(Population, Average)),
+                              IMD=round(weighted.mean(IMD, Population),2),
+                              Average=round(weighted.mean(Average, Population)),
                               AGI=round(ccg$similar_AGI),
                               AGI_LCI=round(ccg$similar_AGI_LCI),
                               AGI_UCI=round(ccg$similar_AGI_UCI),

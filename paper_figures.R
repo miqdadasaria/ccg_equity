@@ -167,11 +167,27 @@ summary_stats_for_journal_article = function(national_lm, ccg_data){
   worse_than_both_ccgs = intersect(worse_than_average_ccgs, worse_than_similar_ccgs)
   
   
-  sink(file="output/better_equity_ccgs.txt")
+  sink(file="output/better_than_average_ccgs.txt")
+  print(better_than_average_ccgs)
+  sink()
+  
+  sink(file="output/worse_than_average_ccgs.txt")
+  print(worse_than_average_ccgs)
+  sink()
+  
+  sink(file="output/better_than_similar_ccgs.txt")
+  print(better_than_similar_ccgs)
+  sink()
+  
+  sink(file="output/worse_than_similar_ccgs.txt")
+  print(worse_than_similar_ccgs)
+  sink()
+  
+  sink(file="output/better_than_both_ccgs.txt")
   print(better_than_both_ccgs)
   sink()
   
-  sink(file="output/worse_equity_ccgs.txt")
+  sink(file="output/worse_than_both_ccgs.txt")
   print(worse_than_both_ccgs)
   sink()
   
