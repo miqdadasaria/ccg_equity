@@ -22,12 +22,12 @@ figure_1 = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
   
   agi_lines = as.data.frame(rbind(
     cbind(x,national_agi,"National"),
-    cbind(x,similar_agi,"Similar areas"),
-    cbind(x,ccg_agi,"Selected area")), 
+    cbind(x,similar_agi,"Similar populations"),
+    cbind(x,ccg_agi,"Selected population")), 
     row.names = FALSE,
     stringsAsFactors = FALSE)
   names(agi_lines) = c("imd","AGI","level")
-  agi_lines$level = factor(agi_lines$level,levels=c("National","Similar areas","Selected area"))
+  agi_lines$level = factor(agi_lines$level,levels=c("National","Similar populations","Selected population"))
   agi_lines$imd = as.double(agi_lines$imd)
   agi_lines$AGI = as.double(agi_lines$AGI)
   
@@ -41,10 +41,10 @@ figure_1 = function(lsoa_data, ccg_data, ccg_code, national_sii, trim){
     geom_point(data=scatter_data, 
                aes(x=imdscaled, y=age_stdrate, size=population), 
                alpha=0.3, colour="black") +
-    xlab("small area deprivation rank") + 
-    ylab("standardised rate") +
+    xlab("Neighbourhood deprivation rank**") + 
+    ylab("Standardized emergency admission rate*") +
     scale_x_continuous(breaks=seq(0,1,0.2), labels=c("least deprived","","","","","most deprived")) +
-    scale_color_manual(name="Gradient", values=c("red","blue","green")) +
+    scale_color_manual(name="Gradient", values=c("firebrick4","dodgerblue4","forestgreen")) +
     scale_linetype_manual(name="Gradient", values=c(2,3,1)) + 
     scale_size_continuous(name="Population") +
     geom_line(data=agi_lines, size=1.5, aes(x=imd, y=AGI, group=level, colour=level, linetype=level)) +	
@@ -70,14 +70,16 @@ figure_2 = function(ccg_data, ccg_code, benchmark_sii){
     geom_point(aes(x=0, y=benchmark_sii), size=1, colour="white") +
     geom_point(data=ccg, aes(x=AGI_RANK, y=AGI), size=1, colour="black") +
     geom_errorbar(data=ccg, aes(x=AGI_RANK, ymin=AGI_LCI, ymax=AGI_UCI), width=1/nrow(cat_data), colour="black") +
-    xlab("local area equity rank") + 
-    ylab("AGI") +
-    geom_hline(yintercept=benchmark_sii, colour="red", linetype=2) +
+    xlab("Neighbourhood deprivation rank**") + 
+    ylab("Absolute gradient index (AGI) of emergency admission rate*") +
+    geom_hline(yintercept=benchmark_sii, colour="firebrick4", linetype=2) +
     scale_y_continuous(labels = comma) +
     scale_x_continuous(breaks=seq(0,1,0.2), labels=c("least equitable","","","","","most equitable")) +
     theme_bw() +
     theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(), 
+          panel.grid.minor = element_blank(),
+          axis.text = element_text(size=16),
+          axis.title=element_text(size=22), 
           plot.title = element_text(lineheight=.8, face="bold", size=rel(1.7)),
           plot.margin = unit(c(1, 1, 1, 1), "lines")
     )
@@ -124,16 +126,16 @@ figure_3 = function(lsoa_data, ccg_data, national_sii){
     gather(key,value,-performance,-deprivation) %>%
     separate(key, into=c("trend", "x"), sep="_") %>%
     mutate(x=as.numeric(x))
-  ccgs$trend = factor(ccgs$trend,levels=c("national","similar","selected"),labels=c("National","Similar areas","Selected area"))
+  ccgs$trend = factor(ccgs$trend,levels=c("national","similar","selected"),labels=c("National","Similar populations","Selected population"))
 
   scatter = ggplot() +
     geom_point(data=scatter_data, 
                aes(x=imdscaled, y=age_stdrate, size=population), 
                alpha=0.3, colour="black") +
-    xlab("small area deprivation rank") + 
-    ylab("standardised rate") +
+    xlab("Neighbourhood deprivation rank**") + 
+    ylab("Standardized emergency admission rate*") +
     scale_x_continuous(breaks=seq(0,1,0.2), labels=c("least deprived","","","","","most deprived")) +
-    scale_color_manual(name="Gradient", values=c("red","blue","green")) +
+    scale_color_manual(name="Gradient", values=c("firebrick4","dodgerblue4","forestgreen")) +
     scale_linetype_manual(name="Gradient", values=c(2,3,1)) + 
     scale_size_continuous(name="Population") +
     geom_line(data=ccgs, size=1.5, aes(x=x, y=value, group=trend, colour=trend, linetype=trend)) +	
@@ -143,9 +145,11 @@ figure_3 = function(lsoa_data, ccg_data, national_sii){
           panel.grid.minor = element_blank(), 
           plot.title = element_text(lineheight=.8, face="bold", size=rel(1.7)),
           strip.text = element_text(size=22),
-          axis.text = element_text(size=14),
+          axis.text = element_text(size=16),
           axis.title=element_text(size=22),
-          panel.margin = unit(3, "lines"),
+          legend.text=element_text(size=18),
+          legend.title=element_text(size=20, face="bold"),
+          panel.spacing = unit(4.5, "lines"),
           plot.margin = unit(c(1, 1, 1, 1), "lines")
     )
   
